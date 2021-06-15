@@ -12,6 +12,8 @@ namespace StartupDemo
 {
     public class Startup
     {
+        private string _environmentName;
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -23,7 +25,18 @@ namespace StartupDemo
         {
             if (env.IsDevelopment())
             {
+                _environmentName = "development";
                 app.UseDeveloperExceptionPage();
+            } else if (env.IsStaging())
+            {
+                _environmentName = "staging";
+            } else if (env.IsProduction())
+            {
+                _environmentName = "production";
+            }
+            else
+            {
+                _environmentName = $"unknown - {env.EnvironmentName}";
             }
 
             app.UseRouting();
@@ -32,7 +45,7 @@ namespace StartupDemo
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    await context.Response.WriteAsync($"Hello, World! Running in {_environmentName}");
                 });
             });
         }

@@ -59,12 +59,36 @@ ASP.net supports and allows you to define environment-based startup classes and 
 
 In a mid-sized application, everything can be crammed into a single `Startup.cs` file and still be understandable.
 
+Per the Microsoft Documentation:
 
+"Configure and ConfigureServices support environment-specific versions of the form Configure<EnvironmentName> and Configure<EnvironmentName>Services. If a matching Configure<EnvironmentName>Services or Configure<EnvironmentName> method isn't found, the ConfigureServices or Configure method is used, respectively. This approach is useful when the app requires configuring startup for several environments with many code differences per environment."
+
+Important take aways from that statement:
+* "EnvironmentName" is nothing more than a label set by the environment variable. Thus you can custom environment names and are not limited to ASP.Net's Production, Staging, and Development environments.
+* Order of precedence will waterfall from specific environment to the general method.
+* You don't have to have either `ConfigureServices` or `Configure` defined if all of your environments are configured explicitly.
+* Fun fact, The filename `Startup.cs` is just a naming convention. 
 
 ### The Other Solution
 
-Once you get beyond a certain size, it's probably advantegous to split apart the startup classes.  
+Once you get beyond a certain size, having all of the definitions for all of the environments can be unwieldly. ASP.net allows you to split apart your `Startup.cs` class into environment-specific classes.  
 
+Per the Microsoft Documentation:
+
+"The app can define multiple Startup classes for different environments. The appropriate Startup class is selected at runtime. The class whose name suffix matches the current environment is prioritized. If a matching Startup{EnvironmentName} class isn't found, the Startup class is used. This approach is useful when the app requires configuring startup for several environments with many code differences per environment. Typical apps will not need this approach."
+
+There is a bit more configuration in this regard. In the `main` method, you'll need to implement something like the following:
+
+```
+var assemblyName = typeof(Startup).GetTypeInfo().Assembly.FullName;
+
+return Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
+{
+    webBuilder.UseStartup(assemblyName);
+});
+```
+
+Note: Not fully validated you need this... yet. But it's in their examples.
 
 ## References
 
